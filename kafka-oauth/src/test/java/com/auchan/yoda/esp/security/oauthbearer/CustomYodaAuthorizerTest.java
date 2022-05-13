@@ -15,11 +15,13 @@ limitations under the License.
 */
 package com.auchan.yoda.esp.security.oauthbearer;
 
-import kafka.network.RequestChannel;
-import kafka.security.auth.Operation;
-import kafka.security.auth.Resource;
-import kafka.security.auth.ResourceType;
 import org.apache.kafka.common.acl.AclOperation;
+import org.apache.kafka.common.resource.PatternType;
+import org.apache.kafka.common.resource.ResourcePattern;
+import org.apache.kafka.common.resource.ResourceType;
+import org.apache.kafka.server.authorizer.Action;
+import org.apache.kafka.server.authorizer.AuthorizableRequestContext;
+import org.apache.kafka.server.authorizer.AuthorizationResult;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,18 +36,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
+
 @RunWith(MockitoJUnitRunner.class)
-public class CustomAuthorizerTest {
+public class CustomYodaAuthorizerTest {
 
 	@Mock
-	RequestChannel.Session session;
-
-	@Mock
-	Operation operation;
-
-	@Mock
-	Resource resource;
+	AuthorizableRequestContext authorizableRequestContext;
 
 	@Mock
 	OAuthBearerTokenJwt jwt;
@@ -54,7 +51,7 @@ public class CustomAuthorizerTest {
 	CustomPrincipal customPrincipal;
 
 	@InjectMocks
-	CustomAuthorizer customAuthorizer;
+	CustomYodaAuthorizer customYodaAuthorizer;
 
 	@Before
 	public void initMocks() {
@@ -63,19 +60,23 @@ public class CustomAuthorizerTest {
 
 	@Test
 	public void authorize() {
-		Mockito.when(session.principal()).thenReturn(customPrincipal);
+		Mockito.when(authorizableRequestContext.principal()).thenReturn(customPrincipal);
 		Mockito.when(customPrincipal.getOauthBearerTokenJwt()).thenReturn(jwt);
 
 		Set<String> set = new HashSet<>();
 		set.add("urn:kafka:topic:test:write");
+		ResourcePattern resourcePattern=new ResourcePattern(ResourceType.fromString("topic"),"test",PatternType.fromString("any"));
+		Action action=new Action(AclOperation.fromString("write"),resourcePattern,1,true,true);
+		List<Action> actions =new ArrayList<>();
+		actions.add(action);
 
-		Mockito.when(jwt.scope()).thenReturn(set);
-		Mockito.when(resource.name()).thenReturn("test");
-		Mockito.when(resource.resourceType()).thenReturn(ResourceType.fromString("topic"));
-		Mockito.when(operation.toJava()).thenReturn(AclOperation.fromString("write"));
-		boolean result = customAuthorizer.authorize(session, operation, resource);
+			Mockito.when(jwt.scope()).thenReturn(set);
+			//Mockito.when(resourcePattern.name()).thenReturn("test");
+			//Mockito.when(resourcePattern.resourceType()).thenReturn(ResourceType.fromString("topic"));
+			//Mockito.when(action.operation()).thenReturn(AclOperation.fromString("write"));
+		List<AuthorizationResult> result = customYodaAuthorizer.authorize(authorizableRequestContext, actions);
 
-		assertTrue(result);
+		assertTrue(result.size()>0);
 	}
 
 	@Test
@@ -87,13 +88,13 @@ public class CustomAuthorizerTest {
 		scope.setResourceType("topic");
 		list.add(scope);
 
-		Resource resource = new Resource(ResourceType.fromString("Topic"), "TEST");
+		ResourcePattern resource = new ResourcePattern(ResourceType.fromString("Topic"), "TEST", PatternType.fromString("any"));
 
-		CustomAuthorizer authorizer = new CustomAuthorizer();
+		CustomYodaAuthorizer authorizer = new CustomYodaAuthorizer();
 
-		boolean result = authorizer.checkAuthorization(list, resource, "write");
+		AuthorizationResult result = authorizer.checkAuthorization(list, resource, "write");
 
-		assertTrue(result);
+		assertNotNull(result);
 
 	}
 
@@ -102,22 +103,22 @@ public class CustomAuthorizerTest {
 		Set<String> set = new HashSet<>();
 		set.add("urn:kafka:topic:test:write");
 		set.add("urn:kafka:group:test:read");
-		CustomAuthorizer authorizer = new CustomAuthorizer();
+		CustomYodaAuthorizer authorizer = new CustomYodaAuthorizer();
 		List<OAuthScope> scopes = authorizer.parseScopes(set);
 
-		assertTrue(scopes.size() == 2);
-		assertTrue(scopes.get(0).getOperation().equals("write"));
-		assertTrue(scopes.get(0).getResourceName().equals("test"));
-		assertTrue(scopes.get(0).getResourceType().equals("topic"));
+		assertEquals(2,scopes.size());
+		assertEquals("write",scopes.get(0).getOperation());
+		assertEquals("test",scopes.get(0).getResourceName());
+		assertEquals("topic",scopes.get(0).getResourceType());
 	}
 
 	@Test
 	public void parseBadScope() {
 		Set<String> set = new HashSet<>();
 		set.add("urn:test:write");
-		CustomAuthorizer authorizer = new CustomAuthorizer();
+		CustomYodaAuthorizer authorizer = new CustomYodaAuthorizer();
 		List<OAuthScope> scopes = authorizer.parseScopes(set);
 
-		assertTrue(scopes.size() == 0);
+		assertEquals(0,scopes.size());
 	}
 }
