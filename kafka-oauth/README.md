@@ -66,8 +66,8 @@ limitations under the License.
             # The following were added to test OAuth Bearer SASL
             listeners=SASL_PLAINTEXT://localhost:9092
             advertised.listeners=SASL_PLAINTEXT://localhost:9092
-            listener.name.sasl_plaintext.oauthbearer.sasl.login.callback.handler.class=com.bfm.kafka.security.oauthbearer.OAuthAuthenticateLoginCallbackHandler
-            listener.name.sasl_plaintext.oauthbearer.sasl.server.callback.handler.class=com.bfm.kafka.security.oauthbearer.OAuthAuthenticateValidatorCallbackHandler
+            listener.name.sasl_plaintext.oauthbearer.sasl.login.callback.handler.class=OAuthAuthenticateLoginCallbackHandler
+            listener.name.sasl_plaintext.oauthbearer.sasl.server.callback.handler.class=OAuthAuthenticateValidatorCallbackHandler
             
             ############################# Security/SASL Settings #############################
             security.inter.broker.protocol=SASL_PLAINTEXT
@@ -78,8 +78,8 @@ limitations under the License.
             
             
             ############## Authorizer ###############
-            authorizer.class.name=com.bfm.kafka.security.oauthbearer.CustomAuthorizer
-            principal.builder.class=com.bfm.kafka.security.oauthbearer.CustomPrincipalBuilder
+            authorizer.class.name=CustomAuthorizer
+            principal.builder.class=CustomPrincipalBuilder
 
 #### Add dependencies to Kafka folder
 - Build the kafka-oauth JAR and then copy it from the target directory into the Kafka lib folder.

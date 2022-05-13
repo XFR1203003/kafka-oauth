@@ -34,8 +34,8 @@ limitations under the License.
         //	- sasl.mechanism=OAUTHBEARER
         props.put("sasl.mechanism", "OAUTHBEARER");
         
-        //	- sasl.login.callback.handler.class=com.bfm.kafka.security.oauthbearer.OAuthAuthenticateLoginCallbackHandler
-        props.put("sasl.login.callback.handler.class", "com.bfm.kafka.security.oauthbearer.OAuthAuthenticateLoginCallbackHandler");
+        //	- sasl.login.callback.handler.class=OAuthAuthenticateLoginCallbackHandler
+        props.put("sasl.login.callback.handler.class", "OAuthAuthenticateLoginCallbackHandler");
 
 
 #### Build the JAR
