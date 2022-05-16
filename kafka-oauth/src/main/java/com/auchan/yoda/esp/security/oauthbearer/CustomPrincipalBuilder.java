@@ -16,14 +16,15 @@ limitations under the License.
 package com.auchan.yoda.esp.security.oauthbearer;
 
 import org.apache.kafka.common.KafkaException;
-import org.apache.kafka.common.security.auth.AuthenticationContext;
-import org.apache.kafka.common.security.auth.KafkaPrincipalBuilder;
-import org.apache.kafka.common.security.auth.SaslAuthenticationContext;
+import org.apache.kafka.common.errors.SerializationException;
+import org.apache.kafka.common.security.auth.*;
+
+import java.nio.charset.StandardCharsets;
 
 /**
  * The type Custom principal builder.
  */
-public class CustomPrincipalBuilder implements KafkaPrincipalBuilder {
+public class CustomPrincipalBuilder implements  KafkaPrincipalBuilder, KafkaPrincipalSerde {
 	@Override
 	public CustomPrincipal build(AuthenticationContext authenticationContext) throws KafkaException{
 		try {
@@ -44,5 +45,16 @@ public class CustomPrincipalBuilder implements KafkaPrincipalBuilder {
 		} catch (Exception ex) {
 			throw new KafkaException("Failed to build CustomPrincipal due to: ", ex);
 		}
+	}
+
+	@Override
+	public byte[] serialize(KafkaPrincipal principal) throws SerializationException {
+		return principal.toString().getBytes(StandardCharsets.UTF_8);
+	}
+
+	@Override
+	public KafkaPrincipal deserialize(byte[] bytes) throws SerializationException {
+
+		return new CustomPrincipal(bytes.toString(),"Serialize");
 	}
 }
