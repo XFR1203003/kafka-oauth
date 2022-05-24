@@ -20,7 +20,7 @@ limitations under the License.
     - Run the standalone file to start KeyCloak
         - If you wish to learn more about the KeyCloak configuration follow this link:
         - https://www.keycloak.org/docs/latest/server_installation/index.html#_standalone-mode
-    
+
    ![image info](pictures/KeyCloak/standalone-boot-files.png)
 
 
@@ -28,7 +28,7 @@ limitations under the License.
     - http://localhost:8080
 
 ## Create Admin User
-- The first time you navigate to the administration console you have to create administrator user. 
+- The first time you navigate to the administration console you have to create administrator user.
 - Create an admin user, and login into the administration console.
 
 ## Create Client Scopes
@@ -38,7 +38,7 @@ limitations under the License.
         urn:kafka:{resourceType}:{resourceName}:{operation}
 
  * resourceType: topic, group, cluster
- * resourceName: The name of the resource (topic name, group name, cluster name). 
+ * resourceName: The name of the resource (topic name, group name, cluster name).
  * operation: read, write, create, delete, alter, describe, cluster_action
 
 - Please see Kafka documentation for valid combinations of resource types to operations.
@@ -53,18 +53,19 @@ limitations under the License.
         urn:kafka:cluster:kafka-cluster:cluster_action
 
 #### Kafka Producer Client Scopes
-- Producers will need to be able to write and describe on a topic. 
+- Producers will need to be able to write and describe on a topic.
 
-        urn:kafka:topic:test:describe
-        urn:kafka:topic:test:write 
+        urn:kafka:topic:yoda-test-topic:create (for topic creation whenever auto-create is on)
+        urn:kafka:topic:yoda-test-topic:describe
+        urn:kafka:topic:yoda-test-topic:write
 
-#### Kafka Consumer Client Scopes 
+#### Kafka Consumer Client Scopes
 - Consumers will need to be able to read and describe both a group and a topic.
 
-        urn:kafka:topic:test:describe
-        urn:kafka:topic:test:read 
-        urn:kafka:group:foo:describe
-        urn:kafka:group:foo:read
+        urn:kafka:topic:yoda-test-topic:describe
+        urn:kafka:topic:yoda-test-topic:read
+        urn:kafka:group:test-consumer:describe
+        urn:kafka:group:test-consumer:read
 
 ##### Create the Scopes in KeyCloak
 - To create a Client Scope navigate to the Client Scopes tab in the left menu.
@@ -74,7 +75,7 @@ limitations under the License.
 
 For Example:
 
- ![image info](pictures/KeyCloak/Add-ClientScopes.png) 
+ ![image info](pictures/KeyCloak/Add-ClientScopes.png)
 
 ## Create Kafka Broker Client
 - Create a "kafka-broker" client that represents the Kafka application that needs to perform cluster operations.
@@ -82,7 +83,7 @@ For Example:
 
 For Example:
 
- ![image info](pictures/KeyCloak/TestBroker.png) 
+ ![image info](pictures/KeyCloak/TestBroker.png)
 
 #### Grant Kafka Broker Client Scopes
 - Assign the broker scope specified above to the "kafka-broker" client
@@ -98,7 +99,7 @@ For Example:
 
 For Example:
 
- ![image info](pictures/KeyCloak/TestProducer.png) 
+ ![image info](pictures/KeyCloak/TestProducer.png)
 
 #### Grant Test Producer Client Scopes
 - Assign the producer scopes specified above to the "test-producer" client
@@ -114,7 +115,7 @@ For Example:
 
 For Example:
 
- ![image info](pictures/KeyCloak/TestConsumer.png) 
+ ![image info](pictures/KeyCloak/TestConsumer.png)
 
 #### Grant Test Consumer Client Scopes
 - Assign the consumer scopes specified above to the "test-consumer" client
@@ -122,7 +123,7 @@ For Example:
 For Example:
 
   ![image info](pictures/KeyCloak/TestConsumer-ClientScopes.png)
-    
+
 ## Optional - Create Admin Client
 - This is an admin service account to use from the CLI.
 - The customized CLI will interact with the KeyCloak API to create a scope and add it to a specified client.
@@ -131,28 +132,9 @@ For Example:
 
 For Example:
 
- ![image info](pictures/KeyCloak/AdminClient.png) 
+ ![image info](pictures/KeyCloak/AdminClient.png)
 
 #### Assign Service Account Roles
 - Add realm management roles
 
 ![image info](pictures/KeyCloak/Admin-ServiceAccountRoles.png)
- 
- 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

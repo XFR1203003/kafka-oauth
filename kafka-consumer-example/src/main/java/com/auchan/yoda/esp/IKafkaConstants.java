@@ -13,22 +13,22 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package com.bfm.kafka;
+package com.auchan.yoda.esp;
 
 public interface IKafkaConstants {
-	String KAFKA_BROKERS = "localhost:9092";
+	String KAFKA_BROKERS = "host.docker.internal:9092";
 
-	String CLIENT_ID="test-consumer";
-	
-	String TOPIC_NAME="test";
-	
-	String GROUP_ID_CONFIG="foo";
-	
-	Integer MAX_NO_MESSAGE_FOUND_COUNT=100;
-	
-	String OFFSET_RESET_LATEST="latest";
-	
-	String OFFSET_RESET_EARLIER="earliest";
-	
-	Integer MAX_POLL_RECORDS=1;
+	String CLIENT_ID = "test-consumer";
+
+	String TOPIC_NAME = "yoda-test-topic";
+
+	String GROUP_ID_CONFIG = "test-consumer";
+
+	Integer MAX_NO_MESSAGE_FOUND_COUNT = 10;
+
+	String OFFSET_RESET_LATEST = "latest";
+
+	String OFFSET_RESET_EARLIEST = "earliest";
+
+	Integer MAX_POLL_RECORDS = 1000;
 }

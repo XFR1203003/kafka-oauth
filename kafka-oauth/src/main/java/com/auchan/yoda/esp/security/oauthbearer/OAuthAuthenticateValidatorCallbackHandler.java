@@ -15,27 +15,21 @@ limitations under the License.
 */
 package com.auchan.yoda.esp.security.oauthbearer;
 
+import java.io.IOException;
+import java.util.Objects;
+
 import org.apache.kafka.common.security.oauthbearer.OAuthBearerValidatorCallback;
 import org.apache.kafka.common.utils.Time;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.util.Objects;
-
 /**
  * A Callback for use by the SaslClient and Validator implementations when they require an OAuth 2 bearer token.
  */
 public class OAuthAuthenticateValidatorCallbackHandler extends OAuthAuthenticateCallbackHandler<OAuthBearerValidatorCallback> {
-	//region Member Variables
 
 	private final Logger log = LoggerFactory.getLogger(OAuthAuthenticateValidatorCallbackHandler.class);
 	private Time time = Time.SYSTEM;
-
-
-	//endregion
-
-	//region Constructors
 
 	/**
 	 * Instantiates a new O auth authenticate validator callback handler.
@@ -43,10 +37,6 @@ public class OAuthAuthenticateValidatorCallbackHandler extends OAuthAuthenticate
 	public OAuthAuthenticateValidatorCallbackHandler() {
 		super(new OAuthServiceImpl(), OAuthBearerValidatorCallback.class);
 	}
-
-	//endregion
-
-	//region Protected Methods
 
 	/**
 	 * This callback validates an access token in the OAuth Server
@@ -81,7 +71,5 @@ public class OAuthAuthenticateValidatorCallbackHandler extends OAuthAuthenticate
 
 		log.debug("Finished handling OAuth bearer token validation callback.");
 	}
-
-	//endregion
 }
 

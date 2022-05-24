@@ -13,14 +13,31 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package com.bfm.kafka;
+package com.auchan.yoda.esp;
 
-public interface IKafkaConstants {
-	String KAFKA_BROKERS = "localhost:9092";
+import java.io.Serializable;
+
+public class CustomObject implements Serializable{
+
+	private static final long serialVersionUID = 1L;
 	
-	Integer MESSAGE_COUNT=1000;
-	
-	String CLIENT_ID="test-producer";
-	
-	String TOPIC_NAME="test";
+	private String id;
+
+	private String name;
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
 }

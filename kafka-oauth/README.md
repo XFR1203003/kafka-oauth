@@ -14,7 +14,7 @@ limitations under the License.
 
 # Kafka OAuth Library
  - Provides Authentication and Authorization via OAuth/OIDC
- 
+
 ## Kafka Broker Configuration
 
 #### Download Apache Kafka
@@ -27,7 +27,7 @@ limitations under the License.
 #### Config Files
 - Create a properties file for your Broker OAuth client {broker-configuration.properties}.
 - The file should contain the following properties:
-- NOTES: 
+- NOTES:
     - you will need to update the oauth.server.client.secret to be your client secret!!!!!
     - you can pass this properties under the kafka_server_jaas.conf
 
@@ -39,15 +39,15 @@ limitations under the License.
         oauth.server.grant.type=client_credentials
         oauth.server.scopes=test
         oauth.server.accept.unsecure.server=true
-         # oauth.server.accept.unsecure.server - this propertie is for SSL configuration, if you are using HTTP or a self-signed CERT set this true
+         # oauth.server.accept.unsecure.server - this property is for SSL configuration, if you are using HTTP or a self-signed CERT set this true
 
 
 - Create a config file for your JAAS security {kafka_server_jaas.conf}
     - The file must contain the following:
     - NOTE: the properties started by oauth.server only needed if you don't want to user the broker-configuration.properties file!
-    
+
             KafkaServer {
-                org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required 
+                org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required
                 oauth.server.base.uri="http://localhost:8080/auth/realms/master/protocol/openid-connect"
                 oauth.server.token.endpoint.path="/token"
                 oauth.server.introspection.endpoint.path="/token/introspect"
@@ -61,30 +61,30 @@ limitations under the License.
 
 - Update the Kafka server.properties file.
     - The original can be found in the kafka config folder, add these properties to the end of the file:
-    
+
 
             # The following were added to test OAuth Bearer SASL
             listeners=SASL_PLAINTEXT://localhost:9092
             advertised.listeners=SASL_PLAINTEXT://localhost:9092
             listener.name.sasl_plaintext.oauthbearer.sasl.login.callback.handler.class=OAuthAuthenticateLoginCallbackHandler
             listener.name.sasl_plaintext.oauthbearer.sasl.server.callback.handler.class=OAuthAuthenticateValidatorCallbackHandler
-            
+
             ############################# Security/SASL Settings #############################
             security.inter.broker.protocol=SASL_PLAINTEXT
             sasl.mechanism.inter.broker.protocol=OAUTHBEARER
             sasl.enabled.mechanisms=OAUTHBEARER
             connections.max.reauth.ms=60000
-            
-            
-            
+
+
+
             ############## Authorizer ###############
-            authorizer.class.name=CustomAuthorizer
+            authorizer.class.name=CustomYodaAuthorizer
             principal.builder.class=CustomPrincipalBuilder
 
 #### Add dependencies to Kafka folder
 - Build the kafka-oauth JAR and then copy it from the target directory into the Kafka lib folder.
     - This is needed for Kafka to utilize the custom classes communicating with the OAuth server.
-    
+
             C:> git clone https://blade-git.blackrock.com/cachematrix/lib-kafka-oauth.git
             C:> cd lib-kafka-oauth\    
             C:\lib-kafka-oauth> mvn install            - NOTE: this will build all JARs (Kafka OAuth, Test consumer, and Test Producer)
@@ -93,24 +93,22 @@ limitations under the License.
                 .
             C:\lib-kafka-oauth> copy kafka-oauth\target\libkafka.oauthbearer-1.0.0.jar {KAFKA_DIRECTORY}\libs\.
 
-- Move your updated server.properties file into the kafka config directory. 
+- Move your updated server.properties file into the kafka config directory.
 - Move your kafka_server_jaas.conf file to the kafka config directory.
 
 ## Run Kafka with OAuth
 - Open two CMD windows to run the zookeeper and broker
     - Run the Zookeeper
-    
+
     ---
-    
+
         bin\windows\zookeeper-server-start.bat config\zookeeper.properties
-        
+
     - Run the Broker
-    
+
     ---
         set KAFKA_OPTS=-Djava.security.auth.login.config={PATH_TO_JASS_CONFIG_FILE}\kafka_server_jaas.conf
-        
+
         set KAFKA_OAUTH_SERVER_PROP_FILE={PATH_TO_PROPERTIES_FILE}\broker-configuration.properties
-        
+
         bin\windows\kafka-server-start.bat config\server.properties
-    
-    

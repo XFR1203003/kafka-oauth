@@ -15,24 +15,19 @@ limitations under the License.
 */
 package com.auchan.yoda.esp.security.oauthbearer;
 
+import java.io.IOException;
+import java.util.Objects;
+
 import org.apache.kafka.common.security.oauthbearer.OAuthBearerTokenCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.Objects;
 
 /**
  * A Callback for use by the SaslClient and Login implementations when they require an OAuth 2 bearer token.
  */
 public class OAuthAuthenticateLoginCallbackHandler extends OAuthAuthenticateCallbackHandler<OAuthBearerTokenCallback> {
-	//region Member Variables
 
 	private final Logger log = LoggerFactory.getLogger(OAuthAuthenticateLoginCallbackHandler.class);
-
-	//endregion
-
-	//region Constructors
 
 	/**
 	 * Instantiates a new O auth authenticate login callback handler.
@@ -40,10 +35,6 @@ public class OAuthAuthenticateLoginCallbackHandler extends OAuthAuthenticateCall
 	public OAuthAuthenticateLoginCallbackHandler() {
 		super(new OAuthServiceImpl(), OAuthBearerTokenCallback.class);
 	}
-
-	//endregion
-
-	//region Protected Methods
 
 	/**
 	 * This method handles attempt to login by requesting an access token from the OAuth Server
@@ -86,6 +77,4 @@ public class OAuthAuthenticateLoginCallbackHandler extends OAuthAuthenticateCall
 		oauthBearerTokenCallback.token(token);
 		log.debug("Finished handling OAuth bearer token login callback.");
 	}
-
-	//endregion
 }
