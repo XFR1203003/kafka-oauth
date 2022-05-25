@@ -52,7 +52,7 @@ services:
   zookeeper:
     image: confluentinc/cp-zookeeper
     volumes:
-      - ./oauth/zookeeper/zookeeper_server_jaas.conf:/etc/kafka/zookeeper_server_jaas.conf:r
+      - ./zookeeper/zookeeper_server_jaas.conf:/etc/kafka/zookeeper_server_jaas.conf:r
       - zookeeper-data:/var/lib/zookeeper/data
       - zookeeper-log:/var/lib/zookeeper/log
     environment:
@@ -73,26 +73,13 @@ services:
     links:
       - keycloak
 
-  zookeeper-ui:
-    image: tobilg/zookeeper-webui
-    environment:
-      ZK_DEFAULT_NODE: zookeeper:2181
-      # can write to ZK
-      USER: admin
-      PASSWORD: admin
-    ports:
-    - 38080:8080
-    links:
-    - zookeeper
-
-
   kafka:
     image: confluentinc/cp-kafka:7.1.1.amd64
     volumes:
       - kafka-data:/var/lib/kafka
-      - ./oauth/kafka-oauth/kafka_server_jaas.conf:/etc/kafka/kafka_server_jaas.conf:r
-      - ./oauth/kafka-oauth/oauth-configuration.properties:/etc/kafka/oauth-configuration.properties:r
-      - ./oauth/kafka-oauth/target/oauthbearer-1.0.0.jar:/usr/share/java/kafka/oauthbearer-1.0.0.jar:r
+      - ./kafka-oauth/kafka_server_jaas.conf:/etc/kafka/kafka_server_jaas.conf:r
+      - ./kafka-oauth/oauth-configuration.properties:/etc/kafka/oauth-configuration.properties:r
+      - ./kafka-oauth/target/oauthbearer-1.0.0.jar:/usr/share/java/kafka/oauthbearer-1.0.0.jar:r
     environment:
       #
       # KAFKA Configuration
@@ -182,64 +169,88 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
-  schema-registry:
-    image: confluentinc/cp-schema-registry
-    platform: linux/amd64
-    depends_on:
-      - kafka
-    environment:
-      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'PLAINTEXT://kafka:9092'
-      SCHEMA_REGISTRY_HOST_NAME: 'schema-registry'
-      SCHEMA_REGISTRY_LISTENERS: 'http://0.0.0.0:8085'
-      SCHEMA_REGISTRY_LOG4J_ROOT_LOGLEVEL: 'INFO'
-      #SCHEMA_REGISTRY_DEBUG: 'true'
-    ports:
-    - 8085:8085
+  # schema-registry:
+  #   image: confluentinc/cp-schema-registry
+  #   platform: linux/amd64
+  #   depends_on:
+  #     - kafka
+  #   environment:
+  #     #SCHEMA_REGISTRY_DEBUG: 'true'
+  #     SCHEMA_REGISTRY_HOST_NAME: 'schema-registry'
+  #     SCHEMA_REGISTRY_LISTENERS: 'http://0.0.0.0:8085'
+  #     SCHEMA_REGISTRY_LOG4J_ROOT_LOGLEVEL: 'INFO'
+  #
+  #     SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'SASL_PLAINTEXT://kafka:9092'
+  #     SCHEMA_REGISTRY_KAFKASTORE_SECURITY_PROTOCOL: SASL_PLAINTEXT
+  #     SCHEMA_REGISTRY_KAFKASTORE_SASL_MECHANISM: OAUTHBEARER
+  #     SCHEMA_REGISTRY_KAFKASTORE_SASL_JAAS_CONFIG: "org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required;"
+  #     SCHEMA_REGISTRY_KAFKASTORE_SASL_LOGIN_CALLBACK_HANDLER_CLASS: io.strimzi.kafka.oauth.client.JaasClientOauthLoginCallbackHandler
+  #     OAUTH_CLIENT_ID: "schema-registry"
+  #     OAUTH_CLIENT_SECRET: "B5RJmCc7RN2vxOvcHVNQCpxcUCbADf7a"
+  #     OAUTH_TOKEN_ENDPOINT_URI: "http://host.docker.internal:8080/auth/realms/yoda-test/protocol/openid-connect/token"
+  #     OAUTH_USERNAME_CLAIM: preferred_username
+  #   ports:
+  #   - 8085:8085
+  #   extra_hosts:
+  #     - "host.docker.internal:host-gateway"
 
-  rest-proxy:
-    image: confluentinc/cp-schema-registry
-    platform: linux/amd64
-    depends_on:
-      - zookeeper
-      - kafka
-      - schema-registry
-    environment:
-      KAFKA_REST_BOOTSTRAP_SERVERS: 'PLAINTEXT://kafka:9092'
-      KAFKA_REST_HOST_NAME: 'rest-proxy'
-      KAFKA_REST_LISTENERS: 'http://0.0.0.0:8082'
-      KAFKA_REST_SCHEMA_REGISTRY_URL: http://schema-registry:8085
-    ports:
-    - 8082:8082
+  # rest-proxy:
+  #   image: confluentinc/cp-schema-registry
+  #   platform: linux/amd64
+  #   depends_on:
+  #     - zookeeper
+  #     - kafka
+  #     - schema-registry
+  #   environment:
+  #     KAFKA_REST_HOST_NAME: 'rest-proxy'
+  #     KAFKA_REST_LISTENERS: 'http://0.0.0.0:8082'
+  #     KAFKA_REST_SCHEMA_REGISTRY_URL: http://schema-registry:8085
+  #
+  #     KAFKA_REST_BOOTSTRAP_SERVERS: 'SASL_PLAINTEXT://kafka:9092'
+  #     KAFKA_REST_CLIENT_SECURITY_PROTOCOL: SASL_PLAINTEXT
+  #     KAFKA_REST_CLIENT_SASL_MECHANISM: OAUTHBEARER
+  #     KAFKA_REST_CLIENT_SASL_JAAS_CONFIG: "org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required;"
+  #     KAFKA_REST_CLIENT_SASL_LOGIN_CALLBACK_HANDLER_CLASS: io.strimzi.kafka.oauth.client.JaasClientOauthLoginCallbackHandler
+  #     OAUTH_CLIENT_ID: "kafka-rest"
+  #     OAUTH_CLIENT_SECRET: "mxIiyg52u8EQ71aK6R2WR7XWgkzt14dt"
+  #     OAUTH_TOKEN_ENDPOINT_URI: "http://host.docker.internal:8080/auth/realms/yoda-test/protocol/openid-connect/token"
+  #     OAUTH_USERNAME_CLAIM: preferred_username
+  #   ports:
+  #   - 8082:8082
+  #   extra_hosts:
+  #     - "host.docker.internal:host-gateway"
 
-  connect:
-    image: confluentinc/cp-kafka-connect
-    platform: linux/amd64
-    depends_on:
-      - kafka
-      - schema-registry
-    environment:
-      CONNECT_BOOTSTRAP_SERVERS: 'kafka:9092'
-      CONNECT_REST_PORT: '8083'
-      CONNECT_REST_LISTENERS: 'http://0.0.0.0:8083'
-      CONNECT_REST_ADVERTISED_HOST_NAME: 'connect'
-      CONNECT_CONFIG_STORAGE_TOPIC: '__connect-config'
-      CONNECT_OFFSET_STORAGE_TOPIC: '__connect-offsets'
-      CONNECT_STATUS_STORAGE_TOPIC: '__connect-status'
-      CONNECT_GROUP_ID: 'kafka-connect'
-      CONNECT_KEY_CONVERTER_SCHEMAS_ENABLE: 'true'
-      CONNECT_KEY_CONVERTER: 'io.confluent.connect.avro.AvroConverter'
-      CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL: 'http://schema-registry:8085'
-      CONNECT_VALUE_CONVERTER_SCHEMAS_ENABLE: 'true'
-      CONNECT_VALUE_CONVERTER: 'io.confluent.connect.avro.AvroConverter'
-      CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: 'http://schema-registry:8085'
-      CONNECT_INTERNAL_KEY_CONVERTER: 'org.apache.kafka.connect.json.JsonConverter'
-      CONNECT_INTERNAL_VALUE_CONVERTER: 'org.apache.kafka.connect.json.JsonConverter'
-      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: '1'
-      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: '1'
-      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: '1'
-      CONNECT_PLUGIN_PATH: ' /usr/share/java/'
-    ports:
-    - 8083:8083
+  # connect:
+  #   image: confluentinc/cp-kafka-connect
+  #   platform: linux/amd64
+  #   depends_on:
+  #     - kafka
+  #     - schema-registry
+  #   environment:
+  #     CONNECT_BOOTSTRAP_SERVERS: 'kafka:9092'
+  #     CONNECT_REST_PORT: '8083'
+  #     CONNECT_REST_LISTENERS: 'http://0.0.0.0:8083'
+  #     CONNECT_REST_ADVERTISED_HOST_NAME: 'connect'
+  #     CONNECT_CONFIG_STORAGE_TOPIC: '__connect-config'
+  #     CONNECT_OFFSET_STORAGE_TOPIC: '__connect-offsets'
+  #     CONNECT_STATUS_STORAGE_TOPIC: '__connect-status'
+  #     CONNECT_GROUP_ID: 'kafka-connect'
+  #     CONNECT_KEY_CONVERTER_SCHEMAS_ENABLE: 'true'
+  #     CONNECT_KEY_CONVERTER: 'io.confluent.connect.avro.AvroConverter'
+  #     CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL: 'http://schema-registry:8085'
+  #     CONNECT_VALUE_CONVERTER_SCHEMAS_ENABLE: 'true'
+  #     CONNECT_VALUE_CONVERTER: 'io.confluent.connect.avro.AvroConverter'
+  #     CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: 'http://schema-registry:8085'
+  #     CONNECT_INTERNAL_KEY_CONVERTER: 'org.apache.kafka.connect.json.JsonConverter'
+  #     CONNECT_INTERNAL_VALUE_CONVERTER: 'org.apache.kafka.connect.json.JsonConverter'
+  #     CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: '1'
+  #     CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: '1'
+  #     CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: '1'
+  #     CONNECT_PLUGIN_PATH: ' /usr/share/java/'
+  #   ports:
+  #   - 8083:8083
+  #   extra_hosts:
+  #     - "host.docker.internal:host-gateway"
 
   akhq:
     # build:
@@ -247,11 +258,85 @@ services:
     image: tchiotludo/akhq
     environment:
       AKHQ_CONFIGURATION: |
+        # micronaut:
+        #   security:
+        #     enabled: true
+        #     oauth2:
+        #       enabled: true
+        #       clients:
+        #         YIS:
+        #           client-id: "akhq"
+        #           client-secret: "S50MB08ptgkz2jIAmRB10HH2CaXwjowJ"
+        #           openid:
+        #             issuer: "http://host.docker.internal:8080/auth/realms/yoda-test"
         akhq:
+          ui-options:
+            topic-data:
+              sort: Newest
+            topic:
+              skip-last-record: true
+          # security:
+          #   default-group: no-roles
+          #   groups:
+          #     yoda-admin:
+          #       name: admin
+          #       roles:
+          #       - topic/read
+          #       - topic/insert
+          #       - topic/delete
+          #       - topic/config/update
+          #       - node/read
+          #       - node/config/update
+          #       - topic/data/read
+          #       - topic/data/insert
+          #       - topic/data/delete
+          #       - group/read
+          #       - group/delete
+          #       - group/offsets/update
+          #       - registry/read
+          #       - registry/insert
+          #       - registry/update
+          #       - registry/delete
+          #       - registry/version/delete
+          #       - acls/read
+          #       - connect/read
+          #       - connect/insert
+          #       - connect/update
+          #       - connect/delete
+          #       - connect/state/update
+          #     yoda-user:
+          #       name: reader
+          #       roles:
+          #       - topic/read
+          #       - node/read
+          #       - topic/data/read
+          #       - group/read
+          #       - registry/read
+          #       - acls/read
+          #       - connect/read
+          #   oidc:
+          #     enabled: true
+          #     providers:
+          #       YIS:
+          #         label: "Login with Yoda Identity Services"
+          #         username-field: preferred_username
+          #         groups-field: roles
+          #         groups:
+          #           - name: yoda-admin
+          #             groups:
+          #               - admin
+          #           - name: yoda-user
+          #             groups:
+          #               - reader
           connections:
             docker-kafka-server:
               properties:
-                bootstrap.servers: "kafka:9092"
+                bootstrap.servers: "SASL_PLAINTEXT://kafka:9092"
+                sasl.jaas.config: org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required auth.valid.issuer.uri="http://host.docker.internal:8080/auth/realms/yoda-test" oauth.jwks.endpoint.uri="http://host.docker.internal:8080/auth/realms/yoda-test/protocol/openid-connect/certs" oauth.username.claim="preferred_username" oauth.client.id="akhq" oauth.client.secret="S50MB08ptgkz2jIAmRB10HH2CaXwjowJ" oauth.token.endpoint.uri="http://host.docker.internal:8080/auth/realms/yoda-test/protocol/openid-connect/token";
+                 # oauth.ssl.truststore.location="kafka.server.truststore.jks" oauth.ssl.truststore.password="xxxxx" oauth.ssl.truststore.type="jks" oauth.ssl.endpoint_identification_algorithm=""
+                sasl.login.callback.handler.class: io.strimzi.kafka.oauth.client.JaasClientOauthLoginCallbackHandler
+                security.protocol: SASL_PLAINTEXT
+                sasl.mechanism: OAUTHBEARER
               # schema-registry:
               #   url: "http://schema-registry:8085"
               # connect:
@@ -263,58 +348,22 @@ services:
       - kafka
       # - schema-registry
       # - connect
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
 
-  consumer-example:
-    image: kafka-security/consumer-example
-    build: ./kafka-consumer-example
-    environment:
-      BOOTSTRAP_SERVERS: kafka:9093
-    links:
-      - kafka
-
-  producer-example:
-    image: kafka-security/producer-example
-    build: ./kafka-producer-example
-    environment:
-      BOOTSTRAP_SERVERS: kafka:9093
-    links:
-      - kafka
-
-
-  # test-data:
-  #   image: gradle:6.3-jdk11
-  #   command: "gradle --no-daemon testInjectData"
-  #   working_dir: /app
-  #   volumes:
-  #     - ./:/app:z
+  # consumer-example:
+  #   image: kafka-security/consumer-example
+  #   build: ./kafka-consumer-example
+  #   environment:
+  #     BOOTSTRAP_SERVERS: kafka:9093
   #   links:
   #     - kafka
-  #     - schema-registry
   #
-  # kafkacat:
-  #   image: confluentinc/cp-kafkacat
-  #   depends_on:
-  #     - kafka
-  #   command:
-  #     - bash
-  #     - -c
-  #     - |
-  #       kafkacat -P -b kafka:9092 -t json << EOF
-  #       {"_id":"5c4b2b45ab234c86955f0802","index":0,"guid":"d3637b06-9940-4958-9f82-639001c14c34"}
-  #       {"_id":"5c4b2b459ffa9bb0c0c249e1","index":1,"guid":"08612fb5-40a7-45e5-9ff2-beb89a1b2835"}
-  #       {"_id":"5c4b2b4545d7cbc7bf8b6e3e","index":2,"guid":"4880280a-cf8b-4884-881e-7b64ebf2afd0"}
-  #       {"_id":"5c4b2b45dab381e6b3024c6d","index":3,"guid":"36d04c26-0dae-4a8e-a66e-bde9b3b6a745"}
-  #       {"_id":"5c4b2b45d1103ce30dfe1947","index":4,"guid":"14d53f2c-def3-406f-9dfb-c29963fdc37e"}
-  #       {"_id":"5c4b2b45d6d3b5c51d3dacb7","index":5,"guid":"a20cfc3a-934a-4b93-9a03-008ec651b5a4"}
-  #       EOF
-  #       kafkacat -P -b kafka:9092 -t csv << EOF
-  #       1,Sauncho,Attfield,sattfield0@netlog.com,Male,221.119.13.246
-  #       2,Luci,Harp,lharp1@wufoo.com,Female,161.14.184.150
-  #       3,Hanna,McQuillan,hmcquillan2@mozilla.com,Female,214.67.74.80
-  #       4,Melba,Lecky,mlecky3@uiuc.edu,Female,158.112.18.189
-  #       5,Mordecai,Hurdiss,mhurdiss4@rambler.ru,Male,175.123.45.143
-  #       EOF
-  #       kafkacat -b kafka:9092 -o beginning -G json-consumer json
+  # producer-example:
+  #   image: kafka-security/producer-example
+  #   build: ./kafka-producer-example
+  #   environment:
+  #     BOOTSTRAP_SERVERS: kafka:9093
   #   links:
   #     - kafka

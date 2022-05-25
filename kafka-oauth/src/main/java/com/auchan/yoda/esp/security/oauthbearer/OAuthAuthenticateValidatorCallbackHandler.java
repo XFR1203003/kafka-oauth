@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.util.Objects;
 
 import org.apache.kafka.common.security.oauthbearer.OAuthBearerValidatorCallback;
-import org.apache.kafka.common.utils.Time;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +28,6 @@ import org.slf4j.LoggerFactory;
 public class OAuthAuthenticateValidatorCallbackHandler extends OAuthAuthenticateCallbackHandler<OAuthBearerValidatorCallback> {
 
 	private final Logger log = LoggerFactory.getLogger(OAuthAuthenticateValidatorCallbackHandler.class);
-	private Time time = Time.SYSTEM;
 
 	/**
 	 * Instantiates a new O auth authenticate validator callback handler.

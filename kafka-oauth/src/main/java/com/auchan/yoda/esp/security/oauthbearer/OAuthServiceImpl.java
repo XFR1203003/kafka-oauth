@@ -15,10 +15,6 @@ limitations under the License.
 */
 package com.auchan.yoda.esp.security.oauthbearer;
 
-import org.apache.kafka.common.utils.Time;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -26,6 +22,10 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Objects;
+
+import org.apache.kafka.common.utils.Time;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The class that handles the logic to interact with the OAuth server.
@@ -142,6 +142,7 @@ public class OAuthServiceImpl implements OAuthService {
 		String token = "token=" + accessToken;
 
 		// validate the access token by calling the oauth introspection endpoint
+		// FIXME it is a JWT Bearer token => check it locally without calling the issuer ! (perf issue otherwise)
 		log.debug("Validate the access token by calling the OAuth introspection endpoint.");
 		Map<String, Object> resp = doHttpCall(
 				this.oauthConfiguration.getIntrospectionEndpoint(),
