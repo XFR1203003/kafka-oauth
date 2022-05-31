@@ -143,7 +143,7 @@ public class OAuthServiceImpl implements OAuthService {
 
 		// validate the access token by calling the oauth introspection endpoint
 		// FIXME it is a JWT Bearer token => check it locally without calling the issuer ! (perf issue otherwise)
-		log.debug("Validate the access token by calling the OAuth introspection endpoint.");
+		log.info("Validate the access token by calling the OAuth introspection endpoint.");
 		Map<String, Object> resp = doHttpCall(
 				this.oauthConfiguration.getIntrospectionEndpoint(),
 				token,
