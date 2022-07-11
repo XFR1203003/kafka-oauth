@@ -35,26 +35,26 @@ public class ConsumerApp {
 	static void runConsumer() throws FileNotFoundException, IOException {
 		Consumer<Long, String> consumer = ConsumerCreator.createConsumer();
 
-		int noMessageToFetch = 0;
+		// int noMessageToFetch = 0;
 		int messagesPollMillis = 10000;
 
 		boolean justOneTry = false;
 
 		do {
 			final ConsumerRecords<Long, String> consumerRecords = consumer.poll(Duration.ofMillis(messagesPollMillis));
-			if (consumerRecords.count() == 0) {
-				noMessageToFetch++;
-				if (noMessageToFetch > IKafkaConstants.MAX_NO_MESSAGE_FOUND_COUNT) {
-					log.info("===========> still no message to fetch after {} tries. stopping now", noMessageToFetch);
-					break;
-				} else {
-					log.debug("===========> no message to fetch");
-					continue;
-				}
-			}
+			// if (consumerRecords.count() == 0) {
+			// 	noMessageToFetch++;
+			// 	if (noMessageToFetch > IKafkaConstants.MAX_NO_MESSAGE_FOUND_COUNT) {
+			// 		log.info("===========> still no message to fetch after {} tries. stopping now", noMessageToFetch);
+			// 		break;
+			// 	} else {
+			// 		log.debug("===========> no message to fetch");
+			// 		continue;
+			// 	}
+			// }
 
 			consumerRecords.forEach(record -> {
-				log.info("===========> Record received on partition {}, offset {} with key {} and value \"{}\"",
+				log.info("Record received on partition {}, offset {} with key {} and value \"{}\"",
 						record.partition(), record.offset(), record.key(), record.value());
 			});
 			consumer.commitAsync();
